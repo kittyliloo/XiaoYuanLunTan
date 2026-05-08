@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>注册 · 东海校园论坛</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(145deg, #EFF6FF 0%, #DBEAFE 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .card {
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            border-radius: 48px;
+            padding: 40px 32px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2);
+        }
+        .logo { text-align: center; font-size: 2rem; font-weight: 700; background: linear-gradient(135deg, #1E3A8A, #2563EB); -webkit-background-clip: text; background-clip: text; color: transparent; margin-bottom: 8px; }
+        .sub { text-align: center; color: #6B7280; font-size: 0.9rem; margin-bottom: 32px; }
+        .input-group { margin-bottom: 24px; }
+        .input-label { font-size: 0.8rem; font-weight: 500; margin-bottom: 6px; display: block; }
+        .input-field { width: 100%; padding: 14px 16px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 32px; font-size: 0.95rem; outline: none; }
+        .input-field:focus { border-color: #3B82F6; background: white; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 40px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+        .btn-primary { background: #3B82F6; color: white; }
+        .btn-outline { background: transparent; border: 1px solid #E5E7EB; color: #4B5563; margin-top: 12px; }
+        .error-msg, .success-msg { padding: 12px; border-radius: 28px; font-size: 0.8rem; margin-bottom: 20px; text-align: center; display: none; }
+        .error-msg { background: #FEF2F2; color: #EF4444; }
+        .success-msg { background: #D1FAE5; color: #059669; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="logo">🌊 东海校园圈</div>
+    <div class="sub">创建新账号</div>
+    <div id="errorMsg" class="error-msg"></div>
+    <div id="successMsg" class="success-msg"></div>
+    <div class="input-group">
+        <label class="input-label">用户名</label>
+        <input type="text" id="username" class="input-field" placeholder="用户名（至少3位）">
+    </div>
+    <div class="input-group">
+        <label class="input-label">密码</label>
+        <input type="password" id="password" class="input-field" placeholder="密码（至少3位）">
+    </div>
+    <div class="input-group">
+        <label class="input-label">确认密码</label>
+        <input type="password" id="confirmPwd" class="input-field" placeholder="再次输入密码">
+    </div>
+    <button class="btn btn-primary" onclick="register()">注册</button>
+    <button class="btn btn-outline" onclick="location.href='login.html'">已有账号？去登录</button>
+</div>
+
+<script>
+    const API_BASE = 'http://localhost:5000/api';
+    async function register() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const confirm = document.getElementById('confirmPwd').value;
+        const errorDiv = document.getElementById('errorMsg');
+        const successDiv = document.getElementById('successMsg');
+        if (!username || !password) {
+            errorDiv.textContent = '请填写用户名和密码';
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 3000);
+            return;
+        }
+        if (username.length < 3 || password.length < 3) {
+            errorDiv.textContent = '用户名和密码至少3个字符';
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 3000);
+            return;
+        }
+        if (password !== confirm) {
+            errorDiv.textContent = '两次密码不一致';
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 3000);
+            return;
+        }
+        try {
+            const res = await fetch(`${API_BASE}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (data.success) {
+                successDiv.textContent = '注册成功！正在跳转登录...';
+                successDiv.style.display = 'block';
+                setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+            } else {
+                errorDiv.textContent = data.message || '注册失败';
+                errorDiv.style.display = 'block';
+                setTimeout(() => errorDiv.style.display = 'none', 3000);
+            }
+        } catch (err) {
+            errorDiv.textContent = '网络错误，请重试';
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 3000);
+        }
+    }
+</script>
+</body>
+</html>
